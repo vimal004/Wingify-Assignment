@@ -217,3 +217,30 @@ financial-document-analyzer-debug/
 - Tracks job status: `pending` → `processing` → `success` / `failed`
 - `GET /results` lists all past analyses with pagination
 - Easily swappable to PostgreSQL/MySQL via `DATABASE_URL` env var
+
+---
+
+## Deployment (Render + Neon DB)
+
+This project is configured for easy deployment using Render's Blueprint (Infrastructure as Code).
+
+### 1. Database Setup (Neon)
+
+- Create a project on [Neon.tech](https://neon.tech)
+- Copy your connection string: `postgresql://neondb_owner:password@ep-sweet-forest-host.aws.neon.tech/neondb?sslmode=require`
+
+### 2. Deploy to Render
+
+1. Connect your GitHub repository to [Render](https://render.com).
+2. Render will automatically detect the `render.yaml` file.
+3. In the Render Dashboard, go to **Blueprints** and click **New Blueprint Instance**.
+4. Set the following Environment Variables in the Render UI:
+   - `DATABASE_URL`: Your Neon connection string (replace `postgres://` with `postgresql://` if needed, though the code handles this).
+   - `GEMINI_API_KEY`: Your Google Gemini API key.
+   - `SERPER_API_KEY`: Your Serper.dev API key.
+
+Render will provision:
+
+- A **Web Service** for the FastAPI API.
+- A **Worker Service** for the Celery task processor.
+- A **Redis** instance for the message broker.

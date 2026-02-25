@@ -7,10 +7,22 @@ from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Database setup — SQLite file stored in project root
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./financial_analyzer.db")
+# Database setup - Supports SQLite (local) and PostgreSQL (Neon/Render)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+# Default to SQLite if no URL is provided
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///./financial_analyzer.db"
+# Render/Neon often use 'postgres://', but SQLAlchemy requires 'postgresql://'
+elif DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# Configure engine - SQLite needs check_same_thread=False, Postgres does not
+engine_kwargs = {}
+if DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
