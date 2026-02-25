@@ -2,7 +2,7 @@ click==8.1.7
 # Keep crewai at version 0.130.0
 # Other package versions are flexible and can be changed
 # Only change crewai version if there are critical dependency conflicts that cannot be resolved by other means
-crewai==0.130.0 
+crewai==0.130.0
 crewai-tools==0.47.1
 fastapi==0.110.3
 google-ai-generativelanguage==0.6.4
@@ -40,7 +40,14 @@ opentelemetry-semantic-conventions==0.46b0
 opentelemetry-util-http==0.46b0
 pandas==2.2.2
 pillow==10.3.0
-pip==24.0
 protobuf==4.25.3
 pydantic==1.10.13
 pydantic_core==2.8.0
+# --- Missing dependencies added below ---
+python-dotenv>=1.0.0
+uvicorn>=0.29.0
+python-multipart>=0.0.9
+pypdf>=4.0.0
+sqlalchemy>=2.0.0
+celery>=5.3.0
+redis>=5.0.0
