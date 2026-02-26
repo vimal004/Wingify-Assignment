@@ -7,7 +7,7 @@ from tools import read_data_tool
 ## Task 1: Verify the document is a valid financial document
 verification = Task(
     description=(
-        "Read the uploaded financial document using the provided tool.\n"
+        "Read the uploaded financial document at path '{file_path}' using the Financial Document Reader tool.\n"
         "Verify that it is a legitimate financial document (e.g., 10-K, 10-Q, earnings report, annual report).\n"
         "Identify the document type, the company name, the reporting period, and key sections present.\n"
         "If the document is not a financial report, clearly state that and explain why."
@@ -28,7 +28,8 @@ verification = Task(
 ## Task 2: Analyze the financial document based on user query
 analyze_financial_document = Task(
     description=(
-        "Thoroughly analyze the financial document to answer the user's query: {query}\n"
+        "Thoroughly analyze the financial document at path '{file_path}' to answer the user's query: {query}\n"
+        "Use the Financial Document Reader tool with the path '{file_path}' to read the document.\n"
         "Extract and interpret key financial metrics including:\n"
         "- Revenue, net income, and profit margins\n"
         "- Cash flow from operations, investing, and financing\n"
@@ -53,7 +54,7 @@ analyze_financial_document = Task(
 ## Task 3: Provide investment recommendations
 investment_analysis = Task(
     description=(
-        "Based on the financial analysis, provide well-reasoned investment recommendations.\n"
+        "Based on the financial analysis of the document at '{file_path}', provide well-reasoned investment recommendations.\n"
         "Consider the user's query context: {query}\n"
         "Evaluate:\n"
         "- The company's financial health and growth trajectory\n"
@@ -78,7 +79,7 @@ investment_analysis = Task(
 ## Task 4: Assess risks
 risk_assessment = Task(
     description=(
-        "Perform a thorough risk assessment based on the financial document.\n"
+        "Perform a thorough risk assessment based on the financial document at '{file_path}'.\n"
         "Consider the user's query context: {query}\n"
         "Evaluate:\n"
         "- Credit risk (debt levels, interest coverage, credit ratings)\n"

@@ -5,7 +5,13 @@ load_dotenv()
 
 from crewai import Agent, LLM
 
-from tools import search_tool, read_data_tool
+from tools import read_data_tool
+
+# search_tool is optional — only needed if an agent uses web search
+try:
+    from tools import search_tool
+except Exception:
+    search_tool = None
 
 ### Loading LLM — use Gemini via CrewAI's LLM class
 llm = LLM(

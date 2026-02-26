@@ -4,8 +4,7 @@ import os
 from datetime import datetime
 
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
 # Database setup - Supports SQLite (local) and PostgreSQL (Neon/Render)
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -24,7 +23,10 @@ if DATABASE_URL.startswith("sqlite"):
 
 engine = create_engine(DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class AnalysisResult(Base):

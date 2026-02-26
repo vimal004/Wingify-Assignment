@@ -34,6 +34,7 @@ def analyze_document_task(self, job_id: str, query: str, file_path: str, filenam
     from database import SessionLocal, AnalysisResult
 
     db = SessionLocal()
+    record = None
 
     try:
         # Update status to processing

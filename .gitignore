@@ -1,0 +1,47 @@
+# Virtual environments
+venv/
+venv311/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Environment variables
+.env
+
+# Database files
+*.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled
+*.pyc
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Uploaded files (temporary)
+data/financial_document_*.pdf
+
+# Output artifacts
+outputs/*
+!outputs/.gitkeep

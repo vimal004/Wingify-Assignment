@@ -35,36 +35,39 @@ An AI-powered financial document analysis system built with **CrewAI** and **Fas
 
 | #   | File               | Bug                                                                              | Fix                                                            |
 | --- | ------------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| 1   | `tools.py`         | `from crewai_tools import tools` — invalid export                                | Changed to `from crewai_tools import tool`                     |
-| 2   | `tools.py`         | `Pdf(file_path=path).load()` — `Pdf` class undefined                             | Replaced with `pypdf.PdfReader`                                |
-| 3   | `tools.py`         | `read_data_tool` is `async def` — CrewAI tools must be sync                      | Changed to sync `def`                                          |
-| 4   | `tools.py`         | Tool is a class method with no decorator — CrewAI won't find it                  | Converted to standalone `@tool` function                       |
-| 5   | `tools.py`         | `SerperDevTool` import from deep submodule path                                  | Used `from crewai_tools import SerperDevTool`                  |
-| 6   | `agents.py`        | `from crewai.agents import Agent` — wrong import path                            | Changed to `from crewai import Agent`                          |
-| 7   | `agents.py`        | `llm = llm` — circular self-reference, `NameError` at startup                    | Created proper `LLM(model="gemini/gemini-2.0-flash")` instance |
-| 8   | `agents.py`        | `tool=[...]` — wrong parameter name (singular)                                   | Changed to `tools=[...]` (plural)                              |
-| 9   | `agents.py`        | `max_iter=1` — agent can only do 1 iteration, too restrictive                    | Increased to `max_iter=15`                                     |
-| 10  | `agents.py`        | `max_rpm=1` — 1 request/minute, absurdly throttled                               | Removed the limit                                              |
-| 11  | `agents.py`        | `allow_delegation=True` in single-agent crew — no one to delegate to             | Set to `False`                                                 |
-| 12  | `task.py`          | All tasks assigned to `financial_analyst`                                        | Assigned correct agent to each task                            |
-| 13  | `task.py`          | `tools=[FinancialDocumentTool.read_data_tool]` — old class reference             | Changed to `tools=[read_data_tool]`                            |
-| 14  | `main.py`          | Endpoint function named `analyze_financial_document` collides with imported task | Renamed to `analyze_document_endpoint`                         |
-| 15  | `main.py`          | Crew only has 1 agent and 1 task                                                 | Added all 4 agents and 4 tasks                                 |
-| 16  | `main.py`          | `file_path` parameter accepted but never passed to crew                          | Now passed in crew kickoff inputs                              |
-| 17  | `main.py`          | `uvicorn.run(app, reload=True)` — reload needs string reference                  | Changed to `uvicorn.run("main:app", ...)`                      |
-| 18  | `requirements.txt` | Missing `python-dotenv`, `uvicorn`, `python-multipart`, `pypdf`                  | Added all 4 missing packages                                   |
-| 19  | `README.md`        | `pip install -r requirement.txt` — wrong filename                                | Fixed to `requirements.txt`                                    |
+| 1   | `tools.py`         | `from crewai_tools import tools` — invalid export (`tools` doesn't exist)        | Changed to `from crewai_tools import tool` (the `@tool` decorator) |
+| 2   | `tools.py`         | `Pdf(file_path=path).load()` — `Pdf` class is undefined / doesn't exist          | Replaced with `pypdf.PdfReader` for reliable PDF text extraction |
+| 3   | `tools.py`         | `read_data_tool` is `async def` — CrewAI tools must be synchronous               | Changed to sync `def`                                          |
+| 4   | `tools.py`         | Tool is a class method with no `@tool` decorator — CrewAI can't discover it      | Converted to standalone `@tool`-decorated function              |
+| 5   | `tools.py`         | `SerperDevTool` imported from deep submodule path                                | Used `from crewai_tools import SerperDevTool`                   |
+| 6   | `tools.py`         | `InvestmentTool` and `RiskTool` classes — dead code with TODO stubs              | Removed; these responsibilities belong to agents, not tools     |
+| 7   | `agents.py`        | `from crewai.agents import Agent` — wrong import path                            | Changed to `from crewai import Agent`                          |
+| 8   | `agents.py`        | `llm = llm` — circular self-reference causes `NameError` at startup             | Created proper `LLM(model="gemini/gemini-2.0-flash")` instance |
+| 9   | `agents.py`        | `tool=[...]` — wrong parameter name (singular)                                   | Changed to `tools=[...]` (plural, as CrewAI expects)            |
+| 10  | `agents.py`        | `max_iter=1` — agent can only do 1 iteration, insufficient for complex analysis  | Increased to `max_iter=15`                                     |
+| 11  | `agents.py`        | `max_rpm=1` — 1 request/minute, absurdly throttled for any practical use         | Removed the limit entirely                                     |
+| 12  | `agents.py`        | `allow_delegation=True` — adds unpredictable delegation overhead and extra token cost in a sequential pipeline where each agent has a defined role | Set to `False` for deterministic execution |
+| 13  | `task.py`          | All 4 tasks assigned to `financial_analyst` only                                | Assigned each task to its correct agent (verifier, analyst, advisor, risk_assessor) |
+| 14  | `task.py`          | `tools=[FinancialDocumentTool.read_data_tool]` — references old broken class     | Changed to `tools=[read_data_tool]`                            |
+| 15  | `task.py`          | No task description mentions `{file_path}` — uploaded files are never read       | Added `{file_path}` to all task descriptions so agents read the correct uploaded file |
+| 16  | `main.py`          | Endpoint function named `analyze_financial_document` collides with imported task | Renamed endpoint to `analyze_document_endpoint`                 |
+| 17  | `main.py`          | Crew only has 1 agent and 1 task instead of the full pipeline                    | Added all 4 agents and 4 tasks                                 |
+| 18  | `main.py`          | `file_path` parameter accepted but never passed to crew `kickoff()`              | Now passed in crew kickoff inputs: `{"query": ..., "file_path": ...}` |
+| 19  | `main.py`          | `uvicorn.run(app, reload=True)` — `reload` needs string reference, not object    | Changed to `uvicorn.run("main:app", ...)`                      |
+| 20  | `requirements.txt` | Missing `python-dotenv`, `uvicorn`, `python-multipart`, `pypdf`                  | Added all missing packages                                     |
+| 21  | `README.md`        | `pip install -r requirement.txt` — wrong filename (missing `s`)                  | Fixed to `requirements.txt`                                    |
 
 ### Inefficient/Harmful Prompts Fixed
 
-Every agent and task had intentionally harmful prompts that:
+Every agent and task in the original code had intentionally harmful prompts that:
 
-- Encouraged **fabricating data** and fake URLs
-- Told agents to **ignore the user's query**
-- Promoted **non-compliant financial advice**
-- Instructed agents to **contradict themselves**
+- Encouraged **fabricating data** and generating fake URLs
+- Told agents to **ignore the user's query** entirely
+- Promoted **non-compliant financial advice** (no disclaimers)
+- Instructed agents to **contradict themselves** within the same response
+- Used unprofessional backstories (Reddit investors, YouTube influencers, etc.)
 
-**All prompts were rewritten** to be professional, accurate, and aligned with actual financial analysis best practices. Each agent now has a clear, distinct responsibility with appropriate backstory.
+**All prompts were rewritten** to be professional, accurate, and aligned with actual financial analysis best practices. Each agent now has a clear, distinct responsibility with an appropriate backstory reflecting real-world expertise.
 
 ---
 
@@ -74,7 +77,7 @@ Every agent and task had intentionally harmful prompts that:
 
 - Python 3.10+
 - A [Google Gemini API key](https://aistudio.google.com/apikey)
-- A [Serper API key](https://serper.dev/) (for web search tool)
+- A [Serper API key](https://serper.dev/) (optional — for web search functionality)
 
 ### Installation
 
@@ -102,6 +105,12 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The API will be available at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+
+### Running Tests
+
+```bash
+pytest test_app.py -v
+```
 
 ### Optional: Async Processing with Celery
 
@@ -193,10 +202,13 @@ financial-document-analyzer-debug/
 ├── agents.py          # CrewAI agent definitions (4 agents)
 ├── task.py            # CrewAI task definitions (4 tasks)
 ├── tools.py           # PDF reader tool and search tool
-├── database.py        # SQLAlchemy models (SQLite)
+├── database.py        # SQLAlchemy models (SQLite/PostgreSQL)
 ├── celery_app.py      # Celery worker for async processing
+├── test_app.py        # Pytest test suite
 ├── requirements.txt   # Python dependencies
 ├── .env.example       # Environment variable template
+├── .gitignore         # Git ignore rules
+├── render.yaml        # Render deployment config (IaC)
 ├── data/              # Directory for uploaded/sample PDFs
 │   └── TSLA-Q2-2025-Update.pdf
 └── outputs/           # Output directory
