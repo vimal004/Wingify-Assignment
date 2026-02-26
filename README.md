@@ -13,7 +13,7 @@ An enterprise-grade financial document analysis system that transforms raw PDFs 
 
 ## 🛠️ The Mission: Debug & Optimize
 
-The original codebase was intentionally seeded with **deterministic bugs** and **harmful prompts**. My task was to restore the system to a production-ready state, ensuring accuracy, performance, and reliability.
+The original codebase was intentionally seeded with **deterministic bugs** and **harmful prompts**. My task was to restore the system to a production-ready state, ensuring accuracy, performance, and reliability while implementing additional architectural features.
 
 ### 🐛 1. Deterministic Bug Fixes (Highlights)
 
@@ -41,19 +41,22 @@ The original prompts were designed to be unprofessional and intentionally mislea
 
 ## 🚀 Key Features & Bonus Goals
 
+### 🎨 Premium Dashboard
+A high-end, professional dark-mode dashboard for a superior recruiter experience.
+- **Drag & Drop**: Seamless PDF uploads.
+- **Agent Progress**: Visual feedback of the AI Crew pipeline.
+- **Formatted Reports**: High-readability markdown analysis.
+- **Live Access**: Available at `http://localhost:8000/`
+
 ### 🔄 Queue Worker Model (Bonus Point ✅)
 Implemented a distributed task queue using **Celery** and **Redis**.
-- **Benefit:** Handles concurrent analysis requests without blocking the API.
-- **Endpoint:** `/analyze/async` returns a job ID immediately.
+- **Benefit**: Handles concurrent analysis requests without blocking the API.
+- **Endpoint**: `/analyze/async` returns a job ID immediately for background processing.
 
 ### 🗄️ Database Integration (Bonus Point ✅)
-Integrated **SQLAlchemy** with a local SQLite database (easily swappable to PostgreSQL).
-- **Benefit:** Every analysis is persisted. Users can retrieve past reports via `/results`.
-- **Status Tracking:** Tracks `pending`, `processing`, `success`, and `failed` states.
-
-### 🎨 Premium Dashboard
-A dark-mode, responsive frontend built with modern CSS.
-- **Features:** Drag-and-drop uploads, real-time agent pipeline status, and formatted markdown report rendering.
+Integrated **SQLAlchemy** with a local SQLite database (ready for PostgreSQL/Neon deployment).
+- **Benefit**: Every analysis is persisted. Users can retrieve past reports via `/results`.
+- **Status Tracking**: Tracks `pending` → `processing` → `success` / `failed`.
 
 ---
 
@@ -81,44 +84,38 @@ graph TD
 ## 📖 Setup & Usage
 
 ### 1. Prerequisites
-- Python 3.10+
-- [Google Gemini API Key](https://aistudio.google.com/apikey)
-- Redis (Optional, for Async/Queue features)
+- **Python 3.10+**
+- **Google Gemini API Key**: [Get one here](https://aistudio.google.com/apikey)
+- **Redis**: Required for the async queue worker.
 
 ### 2. Installation
 ```bash
-# Clone and enter directory
+# Clone the repository
 git clone <repo-url>
 cd financial-document-analyzer-debug
 
-# Setup environment
+# Setup virtual environment
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 
 # Configure Secrets
 cp .env.example .env
-# Add your GEMINI_API_KEY to .env
+# Open .env and add your GEMINI_API_KEY
 ```
 
-### 3. Launch
-**Standard Mode (Synchronous):**
+### 3. Launching the System
+**Standard Mode (Synchronous API + Dashboard):**
 ```bash
 uvicorn main:app --reload
 ```
-Access the dashboard at `http://localhost:8000`.
 
-**Enterprise Mode (Async Queue):**
-```bash
-# Terminal 1: Redis
-redis-server
-
-# Terminal 2: Celery Worker
-celery -A celery_app worker --loglevel=info
-
-# Terminal 3: API
-uvicorn main:app --reload
-```
+**Full Enterprise Stack (Async Worker + Redis):**
+1. **Start Redis**: `redis-server`
+2. **Start Worker**: `celery -A celery_app worker --loglevel=info`
+3. **Start API**: `uvicorn main:app --reload`
 
 ---
 
@@ -128,9 +125,27 @@ uvicorn main:app --reload
 | :--- | :--- | :--- |
 | `POST` | `/analyze` | Upload PDF and get analysis result synchronously. |
 | `POST` | `/analyze/async` | Enqueue PDF for background analysis (Bonus). |
-| `GET` | `/results/{job_id}` | Retrieve results for a specific analysis job. |
-| `GET` | `/results` | List all past analyses with pagination (Bonus). |
-| `GET` | `/health` | Check service and database connectivity. |
+| `GET` | `/results/{job_id}` | Retrieve status and content for a specific job. |
+| `GET` | `/results` | List all past analysis records with pagination. |
+| `GET` | `/health` | Check core service health and DB connectivity. |
+
+---
+
+## 🧪 Final Verification & Testing
+
+### Test Suite Results
+Successfully passed all **14/14 automated tests** focusing on PDF parsing, API robustness, and database integrity.
+```bash
+# To run tests
+pytest test_app.py
+```
+
+### Real-World Validation (Tesla Q2 2025)
+Validated using the official **Tesla Q2 2025 Update (Unaudited)** PDF. The multi-agent pipeline correctly:
+1.  **Verified** document authenticity and extracted Q2 2025 metadata.
+2.  **Analyzed** the 12% YoY revenue decline and record growth in the Energy sector.
+3.  **Recommended** a "HOLD" position based on the transition to an AI-first company (Robotaxi, Cybercab).
+4.  **Identified** high risks in automotive inventory turnover (increased to 24 days).
 
 ---
 
@@ -138,48 +153,16 @@ uvicorn main:app --reload
 
 | # | File | Bug Description | Nature of Fix |
 |---|---|---|---|
-| 1 | `agents.py` | `from crewai.agents import Agent` | Corrected to `from crewai import Agent` |
-| 2 | `agents.py` | 1 request/minute and 1 max iteration | Increased to `max_iter=15` and removed RPM limits |
-| 3 | `agents.py` | LLM self-reference circularity | Created proper `LLM()` instance with Gemini model |
-| 4 | `tools.py` | `Pdf` class missing | Replaced with `pypdf.PdfReader` integration |
-| 5 | `tools.py` | Async tool signature | Converted `read_data_tool` to sync as required by current CrewAI |
-| 6 | `task.py` | Agent Mismatch | Re-assigned tasks to appropriate agents instead of dumping all on one analyst |
-| 7 | `main.py` | Kickoff input mismatch | Fixed missing `query` and `file_path` parameters in `kickoff()` |
-| 8 | `main.py` | Hot reload issues | Fixed `uvicorn.run` syntax to support string-based reload |
-| 9 | `requirements.txt` | Missing core libs | Added `python-dotenv`, `pypdf`, `sqlalchemy`, `celery`, `redis` |
-| 10 | `Prompts` | Intentional Hallucination | Rewrote all backstories and goals to follow strict financial ethics |
-
----
-
-<<<<<<< HEAD
-## 🧪 Verification Results
-The system has been tested against the **Tesla Q2 2025 Financial Update**.
-- **Verifier:** Corrected identified document as Unaudited Financial Results.
-- **Analyst:** Extracted 12.3B in GAAP Net Income.
-- **Advisor:** Flagged Robotaxi transition as a high-reward/high-risk pivot.
-- **Risk:** Identified automotive gross margin pressure as the primary short-term concern.
-
-**14/14 automated tests passing** (`pytest test_app.py`).
+| 1 | `agents.py` | `from crewai.agents import Agent` | Updated to direct import `from crewai import Agent`. |
+| 2 | `agents.py` | Throttled `max_rpm=1` and `max_iter=1` | Removed caps to allow the agent to actually complete complex tasks. |
+| 3 | `agents.py` | llm attribute circularity | Properly instantiated the `LLM` class for Gemini. |
+| 4 | `tools.py` | Missing `Pdf` class | Integrated `pypdf.PdfReader` for reliable extraction. |
+| 5 | `tools.py` | Async tool issues | Converted tools to sync as required by the current CrewAI version. |
+| 6 | `task.py` | One Agent Trap | Redistributed tasks to their respective specialized agents. |
+| 7 | `main.py` | Kickoff input mismatch | Properly mapped `query` and `file_path` in the kickoff dictionary. |
+| 8 | `main.py` | Reload syntax | Fixed `uvicorn` run command for string-based reloading. |
+| 9 | `requirements.txt`| Missing dependencies | Added `pypdf`, `python-dotenv`, `sqlalchemy`, `celery`, `redis`. |
+| 10 | `agents.py` | Missing provider prefix | Standardized model string to `gemini/gemini-flash-latest`. |
 
 ---
 *Created with ❤️ for the Wingify/VWO AI Internship Challenge.*
-=======
-## 🎨 New: Premium Dashboard
-
-We’ve added a professional, dark-mode dashboard for a superior recruiter experience.
-- **Drag & Drop**: Seamless PDF uploads.
-- **Agent Progress**: Visual feedback of the AI Crew pipeline.
-- **Formatted Reports**: High-readability markdown analysis.
-
-Access it at: `http://localhost:8000/`
-
----
-
-## Final Verification Results (Tesla Q2 2025)
-
-The system was verified using the official **Tesla Q2 2025 Update (Unaudited)** PDF. The multi-agent pipeline correctly:
-1. **Verified** the document authenticity and extracted Q2 2025 metadata.
-2. **Analyzed** the 12% YoY revenue decline and the record growth in the Energy sector.
-3. **Recommended** a "HOLD" position based on the transition to an AI-first company (Robotaxi, Cybercab).
-4. **Identified** high risks in automotive inventory "days of supply" (increased to 24 days).
->>>>>>> 205e3f7eead6b883f4796ab9f65a4bf187546e37
