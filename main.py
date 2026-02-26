@@ -1,4 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import os
 import uuid
 from datetime import datetime
@@ -22,6 +24,21 @@ app = FastAPI(title="Financial Document Analyzer")
 # Initialize database on startup
 init_db()
 
+# Static files and frontend
+if not os.path.exists("static"):
+    os.makedirs("static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def read_root():
+    """Serve the frontend dashboard."""
+    return FileResponse("static/index.html")
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy", "service": "Financial Analyzer", "timestamp": datetime.utcnow()}
+
 
 def run_crew(query: str, file_path: str = "data/sample.pdf"):
     """Run the full financial analysis crew pipeline."""
@@ -36,9 +53,9 @@ def run_crew(query: str, file_path: str = "data/sample.pdf"):
     return result
 
 
-@app.get("/")
-async def root():
-    """Health check endpoint"""
+@app.get("/health-json")
+async def root_json():
+    """Alternative health check endpoint"""
     return {"message": "Financial Document Analyzer API is running"}
 
 

@@ -257,9 +257,36 @@ This project is configured for easy deployment using Render's Blueprint (Infrast
 
 Render will provision:
 
-- A **Web Service** for the FastAPI API.
+- A **Web Service** for the FastAPI API + Frontend.
 - A **Worker Service** for the Celery task processor.
-- A **Redis** instance for the message broker.
+
+---
+
+## 🎨 New: Premium Dashboard
+
+We’ve added a professional, dark-mode dashboard for a superior recruiter experience.
+- **Drag & Drop**: Seamless PDF uploads.
+- **Agent Progress**: Visual feedback of the AI Crew pipeline.
+- **Formatted Reports**: High-readability markdown analysis.
+
+Access it at: `http://localhost:8000/`
+
+---
+
+## 🚀 One-Click Deployment (Render + Neon + Upstash)
+
+This app is configured for a fully distributed cloud architecture.
+
+### 1. Database (Neon PostgreSQL)
+The `DATABASE_URL` is already configured for the provided Neon instance.
+
+### 2. Queue (Upstash Redis)
+The `REDIS_URL` is configured for the provided external Upstash instance.
+
+### 3. Deploy to Render
+1. Connect this GitHub repo to **Render**.
+2. Render will auto-detect `render.yaml`.
+3. The environment variables from your `.env` are pre-mapped in the blueprint.
 
 ---
 

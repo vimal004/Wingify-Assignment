@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Intelligence Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #22d3ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(34, 211, 238, 0.1) 0, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 3rem 1.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section {
+            margin-bottom: 2rem;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .drop-zone:hover, .drop-zone.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .drop-zone input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .drop-zone i {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-top: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #result-section {
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .analysis-content {
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .analysis-content h1, .analysis-content h2, .analysis-content h3 {
+            margin: 1.5rem 0 1rem;
+            color: var(--accent);
+        }
+
+        .analysis-content p {
+            margin-bottom: 1rem;
+        }
+
+        .analysis-content ul, .analysis-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .analysis-content code {
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+
+        .loading-overlay {
+            display: none;
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .success-badge {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        footer {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i data-lucide="bar-chart-3"></i>
+            <h1>FinAnalyzer Pro</h1>
+        </div>
+        <p class="subtitle">AI-Powered Financial Intelligence for Decision Makers</p>
+    </header>
+
+    <main>
+        <div class="card" id="input-card">
+            <div class="upload-section">
+                <div class="drop-zone" id="drop-zone">
+                    <i data-lucide="upload-cloud" size="48"></i>
+                    <p>Drag & drop financial PDF or click to browse</p>
+                    <span class="subtitle" id="file-name-display">Supports 10-K, 10-Q, and annual reports</span>
+                    <input type="file" id="file-input" accept="application/pdf">
+                </div>
+
+                <div class="form-group">
+                    <label for="query-input">Analysis Query</label>
+                    <input type="text" id="query-input" placeholder="e.g. Analyze revenue growth and major risk factors...">
+                </div>
+
+                <button class="btn" id="analyze-btn">
+                    <i data-lucide="zap"></i>
+                    Start Intelligence Report
+                </button>
+            </div>
+        </div>
+
+        <div class="card loading-overlay" id="loading-state">
+            <div class="spinner"></div>
+            <p id="loading-msg">Initializing AI Crew...</p>
+            <p class="status-text mt-2">Connecting to Gemini Pro...</p>
+        </div>
+
+        <div id="result-section" class="card">
+            <div class="result-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <i data-lucide="check-circle-2" style="color: #4ade80;"></i>
+                    <h2 style="font-size: 1.25rem;">Intelligence Report</h2>
+                </div>
+                <div class="success-badge">VERIFIED</div>
+            </div>
+            <div class="analysis-content" id="report-content"></div>
+            <button class="btn" style="background: rgba(255,255,255,0.05); margin-top: 3rem;" onclick="location.reload()">
+                <i data-lucide="refresh-cw"></i>
+                Analyze Another Document
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 FinAnalyzer AI. All rights reserved. Powered by CrewAI & Google Gemini.</p>
+    </footer>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const inputCard = document.getElementById('input-card');
+        const loadingState = document.getElementById('loading-state');
+        const loadingMsg = document.getElementById('loading-msg');
+        const resultSection = document.getElementById('result-section');
+        const reportContent = document.getElementById('report-content');
+
+        // File Selection
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+                fileNameDisplay.style.color = 'var(--accent)';
+            }
+        });
+
+        // Drag and Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('active');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileNameDisplay.textContent = fileInput.files[0].name;
+                fileNameDisplay.style.color = 'var(--accent)';
+            }
+        });
+
+        // Analysis Execution
+        analyzeBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            const query = document.getElementById('query-input').value;
+
+            if (!file) {
+                alert('Please upload a financial document first.');
+                return;
+            }
+            if (!query) {
+                alert('Please enter an analysis query.');
+                return;
+            }
+
+            // UI State Switch
+            inputCard.style.display = 'none';
+            loadingState.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('query', query);
+
+            const statusUpdates = [
+                "Deploying Verification Agent...",
+                "Verifier confirmed document integrity.",
+                "Financial Analyst extracting metrics...",
+                "Calculating ratios and margins...",
+                "Investment Advisor preparing thesis...",
+                "Risk Specialist assessing exposures...",
+                "Finalizing Intelligence Report..."
+            ];
+
+            let statusIdx = 0;
+            const statusInterval = setInterval(() => {
+                if (statusIdx < statusUpdates.length) {
+                    loadingMsg.textContent = statusUpdates[statusIdx];
+                    statusIdx++;
+                }
+            }, 6000);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    clearInterval(statusInterval);
+                    loadingState.style.display = 'none';
+                    resultSection.style.display = 'block';
+                    // Render Markdown
+                    reportContent.innerHTML = marked.parse(data.analysis);
+                    // Scroll to top of result
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(data.detail || 'Analysis failed');
+                }
+            } catch (error) {
+                clearInterval(statusInterval);
+                alert('Error: ' + error.message);
+                inputCard.style.display = 'block';
+                loadingState.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

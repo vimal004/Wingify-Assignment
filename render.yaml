@@ -13,10 +13,9 @@ services:
       - key: SERPER_API_KEY
         sync: false
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cache
-          property: connectionString
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.10.0
 
   # Celery Worker
   - type: worker
@@ -32,12 +31,6 @@ services:
       - key: SERPER_API_KEY
         sync: false
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cache
-          property: connectionString
-
-  # Redis Instance
-  - type: redis
-    name: cache
-    ipAllowList: [] # Only allow internal connections
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.10.0
