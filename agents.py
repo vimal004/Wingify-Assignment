@@ -1,7 +1,7 @@
 ## Importing libraries and files
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 
 from crewai import Agent, LLM
 
@@ -14,9 +14,15 @@ except Exception:
     search_tool = None
 
 ### Loading LLM — use Gemini via CrewAI's LLM class
+key = os.getenv("GEMINI_API_KEY")
+if key:
+    print(f"DEBUG: Using API Key starting with: {key[:8]}...")
+else:
+    print("DEBUG: NO API KEY FOUND IN ENV!")
+
 llm = LLM(
-    model="gemini/gemini-2.0-flash",
-    api_key=os.getenv("GEMINI_API_KEY"),
+    model="gemini/gemini-flash-latest",
+    api_key=key,
 )
 
 # Creating an Experienced Financial Analyst agent

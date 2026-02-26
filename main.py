@@ -2,6 +2,8 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends
 import os
 import uuid
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv(override=True)
 
 from sqlalchemy.orm import Session
 
